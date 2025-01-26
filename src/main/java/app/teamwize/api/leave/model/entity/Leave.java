@@ -29,7 +29,20 @@ public class Leave extends BaseAuditEntity {
     private LeaveStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private LeavePolicyActivatedType type;
+    @JoinColumns({
+            @JoinColumn(name = "policy_id", referencedColumnName = "policy_id"),
+            @JoinColumn(name = "type_id", referencedColumnName = "type_id")
+    })
+    private LeavePolicyActivatedType activatedType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id", insertable = false, updatable = false)
+    private LeaveType type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "policy_id", insertable = false, updatable = false)
+    private LeavePolicy policy;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
@@ -40,5 +53,15 @@ public class Leave extends BaseAuditEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Organization organization;
+
+
+    @PrePersist
+    @PreUpdate
+    private void syncReferences() {
+        if (activatedType != null) {
+            this.type = activatedType.getType();
+            this.policy = activatedType.getPolicy();
+        }
+    }
 
 }

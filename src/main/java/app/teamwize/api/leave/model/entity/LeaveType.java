@@ -24,6 +24,10 @@ public class LeaveType extends BaseAuditEntity {
     private LeaveTypeCycle cycle;
     @Enumerated(EnumType.STRING)
     private EntityStatus status;
+    private String symbol;
+    private Integer amount;
+    private Boolean requiresApproval;
+
     @ManyToOne
     private Organization organization;
 

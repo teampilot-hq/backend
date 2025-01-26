@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="20250126-1650-change-policy-activated-type-id" author="M.Karimi">
+        <sql>
+            delete
+            from leaves;
+            delete
+            from leave_policy_activated_types;
+        </sql>
+        <!-- First, drop the old foreign key if it exists -->
+        <dropForeignKeyConstraint
+                baseTableName="leaves"
+                constraintName="leave_type_leave_policy_activated_types_id_fkey"/>
+        <!-- First, ensure type_id and policy_id are not null -->
+        <addNotNullConstraint
+                tableName="leave_policy_activated_types"
+                columnName="type_id"/>
+
+        <addNotNullConstraint
+                tableName="leave_policy_activated_types"
+                columnName="policy_id"/>
+
+        <!-- Add unique constraint to ensure data integrity -->
+        <addUniqueConstraint
+                tableName="leave_policy_activated_types"
+                columnNames="type_id, policy_id"
+                constraintName="uk_leave_policy_activated_types"/>
+
+        <!-- Drop the old primary key -->
+        <dropPrimaryKey tableName="leave_policy_activated_types"/>
+
+        <!-- Drop the id column -->
+        <dropColumn tableName="leave_policy_activated_types">
+            <column name="id"/>
+        </dropColumn>
+
+        <!-- Drop the sequence -->
+        <dropSequence sequenceName="leave_policy_activated_type_id_seq"/>
+
+        <!-- Add new primary key constraint -->
+        <addPrimaryKey
+                tableName="leave_policy_activated_types"
+                columnNames="type_id, policy_id"
+                constraintName="pk_leave_policy_activated_types"/>
+    </changeSet>
+
+    <!-- Optional: Add indexes if needed -->
+    <changeSet id="20250126-1650-add-indexes-for-leave-policy-activated-types" author="M.Karimi">
+        <createIndex
+                indexName="idx_leave_policy_activated_types_policy"
+                tableName="leave_policy_activated_types">
+            <column name="policy_id"/>
+        </createIndex>
+        <createIndex
+                indexName="idx_leave_policy_activated_types_type"
+                tableName="leave_policy_activated_types">
+            <column name="type_id"/>
+        </createIndex>
+    </changeSet>
+
+
+    <changeSet id="20250126-1650-update-leaves-table-for-composite-key" author="M.Karimi">
+
+
+        <!-- Drop the old column if it exists -->
+        <dropColumn tableName="leaves">
+            <column name="type_id"/>
+        </dropColumn>
+
+        <!-- Add new columns for composite foreign key -->
+        <addColumn tableName="leaves">
+            <column name="policy_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <!-- Add new foreign key constraint -->
+        <addForeignKeyConstraint
+                baseTableName="leaves"
+                baseColumnNames="policy_id, type_id"
+                constraintName="fk_leaves_activated_type"
+                referencedTableName="leave_policy_activated_types"
+                referencedColumnNames="policy_id, type_id"/>
+
+        <!-- Add foreign key constraints -->
+        <addForeignKeyConstraint
+                baseTableName="leaves"
+                baseColumnNames="type_id"
+                constraintName="fk_leaves_leave_type"
+                referencedTableName="leave_types"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="leaves"
+                baseColumnNames="policy_id"
+                constraintName="fk_leaves_leave_policy"
+                referencedTableName="leave_policies"
+                referencedColumnNames="id"/>
+
+        <!-- Add indexes for better performance -->
+        <createIndex
+                indexName="idx_leaves_leave_type"
+                tableName="leaves">
+            <column name="type_id"/>
+        </createIndex>
+
+        <createIndex
+                indexName="idx_leaves_leave_policy"
+                tableName="leaves">
+            <column name="policy_id"/>
+        </createIndex>
+
+
+        <!-- Add index for better performance -->
+        <createIndex
+                indexName="idx_leaves_activated_type"
+                tableName="leaves">
+            <column name="policy_id"/>
+            <column name="type_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

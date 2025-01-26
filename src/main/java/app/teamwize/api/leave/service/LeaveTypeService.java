@@ -44,6 +44,9 @@ public class LeaveTypeService {
     @Transactional
     public LeaveType updateLeaveType(Long organizationId, Long id, LeaveTypeUpdateCommand request) throws LeaveTypeNotFoundException {
         var existingLeaveType = getLeaveType(organizationId, id)
+                .setRequiresApproval(request.requiresApproval())
+                .setAmount(request.amount())
+                .setSymbol(request.symbol())
                 .setName(request.name())
                 .setCycle(request.cycle());
         return leaveTypeRepository.merge(existingLeaveType);
@@ -64,6 +67,9 @@ public class LeaveTypeService {
 
     private LeaveType buildLeaveType(Organization organization, LeaveTypeCommand newLeaveType) {
         return new LeaveType()
+                .setSymbol(newLeaveType.symbol())
+                .setRequiresApproval(newLeaveType.requiresApproval())
+                .setAmount(newLeaveType.amount())
                 .setName(newLeaveType.name())
                 .setStatus(EntityStatus.ACTIVE)
                 .setCycle(newLeaveType.cycle())

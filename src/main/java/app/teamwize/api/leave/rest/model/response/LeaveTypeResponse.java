@@ -5,7 +5,10 @@ import app.teamwize.api.leave.model.LeaveTypeCycle;
 
 public record LeaveTypeResponse(
         Long id,
+        String symbol,
         String name,
         LeaveTypeCycle cycle,
+        Integer amount,
+        Boolean requiresApproval,
         EntityStatus status) {
 }

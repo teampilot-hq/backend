@@ -42,6 +42,11 @@ public class LeavePolicyController {
                 .toList();
     }
 
+    @GetMapping("{id}")
+    public LeavePolicyResponse getLeavePolicy(@PathVariable Long id) throws LeavePolicyNotFoundException {
+        var leaveType = leavePolicyService.getLeavePolicy(securityService.getUserOrganizationId(), id);
+        return leavePolicyMapper.toResponse(leaveType);
+    }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("{id}")
