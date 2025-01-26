@@ -10,6 +10,7 @@ import app.teamwize.api.leave.model.command.LeavePolicyCommand;
 import app.teamwize.api.leave.model.command.LeaveTypeCommand;
 import app.teamwize.api.leave.model.entity.LeavePolicy;
 import app.teamwize.api.leave.model.entity.LeavePolicyActivatedType;
+import app.teamwize.api.leave.model.entity.LeavePolicyActivatedTypeId;
 import app.teamwize.api.leave.repository.LeavePolicyRepository;
 import app.teamwize.api.organization.exception.OrganizationNotFoundException;
 import app.teamwize.api.organization.service.OrganizationService;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,9 +58,9 @@ public class LeavePolicyService {
     @Transactional
     public LeavePolicy createDefaultLeavePolicy(Long organizationId) throws OrganizationNotFoundException, LeaveTypeNotFoundException {
         var leaveTypes = leaveTypeService.createLeaveTypes(organizationId, List.of(
-                new LeaveTypeCommand("Vacation", LeaveTypeCycle.PER_MONTH),
-                new LeaveTypeCommand("PTO", LeaveTypeCycle.PER_MONTH),
-                new LeaveTypeCommand("Sick-Leave", LeaveTypeCycle.PER_YEAR)
+                new LeaveTypeCommand("🏖️", "Vacation", LeaveTypeCycle.PER_MONTH, null, true),
+                new LeaveTypeCommand("🧳", "PTO", LeaveTypeCycle.PER_MONTH, 2, true),
+                new LeaveTypeCommand("🤒", "Sick-Leave", LeaveTypeCycle.PER_YEAR, null, false)
         ));
         var request = new LeavePolicyCommand("Default-Policy",
                 LeavePolicyStatus.DEFAULT,
@@ -100,17 +102,32 @@ public class LeavePolicyService {
                 .setStatus(command.status())
                 .setOrganization(organization);
 
-        policy.getActivatedTypes().clear();
+        // Create a set of type IDs from the command for easy lookup
+        var newTypeIds = command.activatedTypes().stream()
+                .map(activatedTypeCommand -> new LeavePolicyActivatedTypeId(policy.getId(), activatedTypeCommand.typeId()))
+                .collect(Collectors.toSet());
 
-        for (var activatedType : command.activatedTypes()) {
-            var type = leaveTypeService.getLeaveType(organizationId, activatedType.typeId());
-            policy.getActivatedTypes().add(new LeavePolicyActivatedType()
+        // Remove activated types that are not in the new command
+        policy.getActivatedTypes().removeIf(activatedType -> !newTypeIds.contains(activatedType.getId()));
+
+        for (var activatedTypeCommand : command.activatedTypes()) {
+            var type = leaveTypeService.getLeaveType(organizationId, activatedTypeCommand.typeId());
+            var activatedType = policy.getActivatedTypes().stream()
+                    .filter(at -> at.getType().getId().equals(type.getId()))
+                    .findFirst()
+                    .orElse(new LeavePolicyActivatedType().setId(new LeavePolicyActivatedTypeId(policy.getId(), type.getId())));
+
+            activatedType
                     .setType(type)
                     .setPolicy(policy)
-                    .setAmount(activatedType.amount())
-                    .setRequiresApproval(activatedType.requiresApproval())
-                    .setStatus(EntityStatus.ACTIVE)
-            );
+                    .setAmount(activatedTypeCommand.amount())
+                    .setRequiresApproval(activatedTypeCommand.requiresApproval())
+                    .setStatus(EntityStatus.ACTIVE);
+
+            if (policy.getActivatedTypes().stream().noneMatch(ac -> ac.equals(activatedType))) {
+                policy.getActivatedTypes().add(activatedType);
+            }
+
         }
 
         return leavePolicyRepository.merge(policy);

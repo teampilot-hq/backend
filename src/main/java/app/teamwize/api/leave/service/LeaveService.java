@@ -14,6 +14,7 @@ import app.teamwize.api.leave.model.UserLeaveBalance;
 import app.teamwize.api.leave.model.command.LeaveCreateCommand;
 import app.teamwize.api.leave.model.command.LeaveUpdateCommand;
 import app.teamwize.api.leave.model.entity.Leave;
+import app.teamwize.api.leave.model.entity.LeavePolicyActivatedTypeId;
 import app.teamwize.api.leave.model.event.LeaveEventPayload;
 import app.teamwize.api.leave.model.event.LeaveStatusUpdatedEvent;
 import app.teamwize.api.leave.repository.LeaveRepository;
@@ -58,10 +59,10 @@ public class LeaveService {
         var user = userService.getUser(organizationId, userId);
         var leavePolicy = leavePolicyService.getLeavePolicy(organizationId, user.getLeavePolicy().getId());
 
-        var leaveType = leavePolicy.getActivatedTypes().stream()
-                .filter(type -> type.getId().equals(command.activatedTypeId()))
+        var activatedType = leavePolicy.getActivatedTypes().stream()
+                .filter(type -> type.getId().equals(new LeavePolicyActivatedTypeId(leavePolicy.getId(), command.typeId())))
                 .findFirst()
-                .orElseThrow(() -> new LeaveTypeNotFoundException("Leave type not found with id: " + command.activatedTypeId()));
+                .orElseThrow(() -> new LeaveTypeNotFoundException("Leave type not found with id: " + command.typeId()));
 
         var dayOff = new Leave()
                 .setReason(command.reason())
@@ -70,12 +71,14 @@ public class LeaveService {
                 .setUser(user)
                 .setOrganization(organization)
                 .setStatus(LeaveStatus.PENDING)
-                .setType(leaveType)
+                .setActivatedType(activatedType)
+                .setPolicy(leavePolicy)
+                .setType(activatedType.getType())
                 .setDuration(calculateLeaveDuration(organization, user, command.start(), command.end()));
         dayOff = leaveRepository.persist(dayOff);
 
 
-       // eventService.emmit(organizationId, new LeaveCreatedEvent(new LeaveEventPayload(dayOff), new UserEventPayload(user)));
+        // eventService.emmit(organizationId, new LeaveCreatedEvent(new LeaveEventPayload(dayOff), new UserEventPayload(user)));
 
         return dayOff;
     }
@@ -122,8 +125,8 @@ public class LeaveService {
         return getById(userId, id);
     }
 
-    public Float getTotalDuration(Long organizationId, Long userId, Long typeId, LeaveStatus status) {
-        var sum = leaveRepository.countByOrganizationIdAndUserIdAndTypeId(organizationId, userId, typeId, status);
+    public Float getTotalDuration(Long organizationId, Long userId, LeavePolicyActivatedTypeId activatedTypeId, LeaveStatus status) {
+        var sum = leaveRepository.countByOrganizationIdAndUserIdAndTypeId(organizationId, userId, activatedTypeId, status);
         return sum != null ? sum : 0f;
     }
 
@@ -131,7 +134,7 @@ public class LeaveService {
         return leaveRepository.findByUserIdAndId(userId, id).orElseThrow(() -> new LeaveNotFoundException("Leave not found with id: " + id));
     }
 
-    public List<UserLeaveBalance> getLeaveBalance(Long organizationId, Long userId) throws UserNotFoundException,  LeavePolicyNotFoundException {
+    public List<UserLeaveBalance> getLeaveBalance(Long organizationId, Long userId) throws UserNotFoundException, LeavePolicyNotFoundException {
         var user = userService.getUser(organizationId, userId);
         var policy = leavePolicyService.getLeavePolicy(organizationId, user.getLeavePolicy().getId());
         var startedAt = user.getCreatedAt().toLocalDate();

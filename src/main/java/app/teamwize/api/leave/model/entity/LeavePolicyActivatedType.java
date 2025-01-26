@@ -13,17 +13,23 @@ import lombok.Setter;
 @Table(name = "leave_policy_activated_types")
 @NoArgsConstructor
 public class LeavePolicyActivatedType extends BaseAuditEntity {
-    @Id
-    @GeneratedValue(generator = "leave_policy_activated_type_id_seq_generator")
-    @SequenceGenerator(name = "leave_policy_activated_type_id_seq_generator", sequenceName = "leave_policy_activated_type_id_seq", allocationSize = 5)
-    private Long id;
+
+    @EmbeddedId
+    private LeavePolicyActivatedTypeId id;
 
     private Integer amount;
-    private boolean requiresApproval;
+    private Boolean requiresApproval;
+
     @ManyToOne
+    @MapsId("typeId") // This maps to the typeId field in LeavePolicyActivatedTypeId
+    @JoinColumn(name = "type_id")
     private LeaveType type;
+
     @ManyToOne
+    @MapsId("policyId") // This maps to the policyId field in LeavePolicyActivatedTypeId
+    @JoinColumn(name = "policy_id")
     private LeavePolicy policy;
+
     @Enumerated(EnumType.STRING)
     private EntityStatus status;
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="20250126-1420-add-symbol-amount-requires-optional-to-leave-types-table" author="Mohsen.K">
+        <addColumn tableName="leave_types">
+            <column name="amount" type="int"/>
+            <column name="symbol" type="varchar"/>
+            <column name="requires_approval" type="boolean"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

@@ -26,7 +26,7 @@ public record LeaveEventPayload(
                 leave.getStartAt(),
                 leave.getEndAt(),
                 leave.getStatus(),
-                leave.getType(),
+                leave.getActivatedType(),
                 leave.getReason(),
                 leave.getDuration()
         );
