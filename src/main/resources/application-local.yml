@@ -3,10 +3,3 @@ spring:
     properties:
       hibernate:
         format_sql: true
-logging:
-  level:
-    org.hibernate.cache: DEBUG
-    org.hibernate.event: DEBUG
-    org.hibernate.tool.hbm2ddl: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.hibernate.sql: DEBUG
