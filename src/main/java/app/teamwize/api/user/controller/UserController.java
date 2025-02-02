@@ -57,7 +57,7 @@ public class UserController {
 
     @PatchMapping("mine")
     public UserResponse updateMyProfile(@RequestBody @Valid UserUpdateRequest request)
-            throws UserNotFoundException, UserAlreadyExistsException, AssetNotFoundException {
+            throws UserNotFoundException, UserAlreadyExistsException, AssetNotFoundException, TeamNotFoundException, LeavePolicyNotFoundException {
         var organizationId = securityService.getUserOrganizationId();
         return userMapper.toUserResponse(userService.partiallyUpdateUser(organizationId, securityService.getUserId(), request));
     }
@@ -69,7 +69,7 @@ public class UserController {
 
     @PatchMapping("{userId}")
     public UserResponse updateProfile(@PathVariable Long userId, @RequestBody @Valid UserUpdateRequest request)
-            throws UserNotFoundException, UserAlreadyExistsException, AssetNotFoundException {
+            throws UserNotFoundException, UserAlreadyExistsException, AssetNotFoundException, TeamNotFoundException, LeavePolicyNotFoundException {
         var organizationId = securityService.getUserOrganizationId();
         return userMapper.toUserResponse(userService.partiallyUpdateUser(organizationId, userId, request));
     }

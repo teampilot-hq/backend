@@ -1,13 +1,12 @@
 package app.teamwize.api.leave.rest.model.request;
 
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record LeaveCreateRequest(
         Long typeId,
         Long policyId,
         String reason,
-        LocalDateTime start,
-        LocalDateTime end
-) {
+        Instant start,
+        Instant end) {
 }

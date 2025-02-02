@@ -9,8 +9,10 @@ import app.teamwize.api.leave.exception.LeaveNotFoundException;
 import app.teamwize.api.leave.exception.LeavePolicyNotFoundException;
 import app.teamwize.api.leave.exception.LeaveTypeNotFoundException;
 import app.teamwize.api.leave.exception.LeaveUpdateStatusFailedException;
+import app.teamwize.api.leave.model.LeaveCheckResult;
 import app.teamwize.api.leave.model.LeaveStatus;
 import app.teamwize.api.leave.model.UserLeaveBalance;
+import app.teamwize.api.leave.model.command.LeaveCheckCommand;
 import app.teamwize.api.leave.model.command.LeaveCreateCommand;
 import app.teamwize.api.leave.model.command.LeaveUpdateCommand;
 import app.teamwize.api.leave.model.entity.Leave;
@@ -18,6 +20,7 @@ import app.teamwize.api.leave.model.entity.LeavePolicyActivatedTypeId;
 import app.teamwize.api.leave.model.event.LeaveEventPayload;
 import app.teamwize.api.leave.model.event.LeaveStatusUpdatedEvent;
 import app.teamwize.api.leave.repository.LeaveRepository;
+import app.teamwize.api.leave.repository.LeaveSpecifications;
 import app.teamwize.api.leave.rest.model.request.LeaveFilterRequest;
 import app.teamwize.api.organization.domain.entity.Organization;
 import app.teamwize.api.organization.exception.OrganizationNotFoundException;
@@ -32,9 +35,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -99,6 +103,9 @@ public class LeaveService {
         if (filters.status() != null) {
             specs = specs.and(hasStatus(filters.status()));
         }
+        if (filters.start() != null && filters.end() != null) {
+            specs = specs.and(LeaveSpecifications.isStartedInBetween(filters.start(), filters.end()).or(LeaveSpecifications.isEndedInBetween(filters.start(), filters.end())));
+        }
         return leaveRepository.findAll(specs, pageRequest);
 
     }
@@ -137,25 +144,25 @@ public class LeaveService {
     public List<UserLeaveBalance> getLeaveBalance(Long organizationId, Long userId) throws UserNotFoundException, LeavePolicyNotFoundException {
         var user = userService.getUser(organizationId, userId);
         var policy = leavePolicyService.getLeavePolicy(organizationId, user.getLeavePolicy().getId());
-        var startedAt = user.getCreatedAt().toLocalDate();
+        var startedAt = user.getCreatedAt();
         var result = new ArrayList<UserLeaveBalance>();
         for (var activatedType : policy.getActivatedTypes()) {
             var usedAmount = this.getTotalDuration(organizationId, userId, activatedType.getId(), LeaveStatus.ACCEPTED);
             var totalAmount = switch (activatedType.getType().getCycle()) {
                 case UNLIMITED -> Integer.MAX_VALUE;
                 case PER_MONTH ->
-                        Period.between(startedAt, LocalDate.now()).toTotalMonths() * activatedType.getAmount();
+                        Period.between(startedAt.atZone(user.getTimeZoneId()).toLocalDate(), LocalDate.now()).toTotalMonths() * activatedType.getAmount();
                 case PER_YEAR ->
-                        (Period.between(startedAt, LocalDate.now()).toTotalMonths() / 12) * activatedType.getAmount();
+                        (Period.between(startedAt.atZone(user.getTimeZoneId()).toLocalDate(), LocalDate.now()).toTotalMonths() / 12) * activatedType.getAmount();
             };
-            result.add(new UserLeaveBalance(activatedType, usedAmount.longValue(), totalAmount, startedAt));
+            result.add(new UserLeaveBalance(activatedType, usedAmount.longValue(), totalAmount, startedAt.atZone(user.getTimeZoneId()).toLocalDate()));
         }
         return result;
     }
 
-    private Float calculateLeaveDuration(Organization organization, User user, LocalDateTime start, LocalDateTime end) {
-        var startDate = start.toLocalDate();
-        var endDate = end.toLocalDate();
+    private Float calculateLeaveDuration(Organization organization, User user, Instant start, Instant end) {
+        var startDate = start.atZone(ZoneId.of(organization.getTimezone())).toLocalDate();
+        var endDate = end.atZone(ZoneId.of(organization.getTimezone())).toLocalDate();
 
         var holidayDates = holidayService.getHolidays(organization.getId(), startDate, endDate, user.getCountry())
                 .stream()
@@ -170,8 +177,35 @@ public class LeaveService {
                 .count();
 
         return (float) leaveDays;
-
     }
 
+    public LeaveCheckResult checkRequestedLeave(Long organizationId, Long userId, LeaveCheckCommand command)
+            throws UserNotFoundException, OrganizationNotFoundException {
+        var organization = organizationService.getOrganization(organizationId);
+        var user = userService.getUser(organizationId, userId);
+        var startDate = command.start().atZone(user.getTimeZoneId()).toLocalDate();
+        var endDate = command.end().atZone(user.getTimeZoneId()).toLocalDate();
+        var currentUserLeaves = getLeaves(organizationId,
+                new LeaveFilterRequest(null, userId, null, command.start(), command.end()),
+                new PaginationRequest(0, 1000)
+        ).getContent();
+        var teamLeaves = getLeaves(organizationId,
+                new LeaveFilterRequest(user.getTeam().getId(), null, LeaveStatus.ACCEPTED, command.start(), command.end()),
+                new PaginationRequest(0, 1000)
+        ).getContent();
+        var leaveDuration = calculateLeaveDuration(organization, user, command.start(), command.end());
+        var holidays = holidayService.getHolidays(organization.getId(), startDate, endDate, user.getCountry());
+
+        return new LeaveCheckResult(
+                true,
+                "You are allowed to request this leave",
+                leaveDuration,
+                currentUserLeaves,
+                teamLeaves,
+                holidays
+        );
+    }
 
 }
+// Range 17 April to 25 April
+// we want to know the leave request that started between 17 to 25 April or ended between 17 to 25 April

@@ -1,10 +1,10 @@
 package app.teamwize.api.leave.model.command;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record LeaveCreateCommand(
         Long typeId,
         String reason,
-        LocalDateTime start,
-        LocalDateTime end) {
+        Instant start,
+        Instant end) {
 }

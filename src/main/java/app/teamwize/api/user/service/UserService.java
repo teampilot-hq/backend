@@ -127,10 +127,11 @@ public class UserService {
     }
 
     @Transactional
-    public User partiallyUpdateUser(Long organizationId, Long userId, UserUpdateRequest request) throws UserNotFoundException, UserAlreadyExistsException, AssetNotFoundException {
+    public User partiallyUpdateUser(Long organizationId, Long userId, UserUpdateRequest request)
+            throws UserNotFoundException, UserAlreadyExistsException, AssetNotFoundException, LeavePolicyNotFoundException, TeamNotFoundException {
         var user = getById(organizationId, userId);
 
-        if (request.getEmail() != null) {
+        if (request.getEmail() != null && request.getEmail().isPresent() && !request.getEmail().get().equals(user.getEmail())) {
             checkIfUserExists(request.getEmail().get());
             user.setEmail(request.getEmail().get());
         }
@@ -147,6 +148,16 @@ public class UserService {
         if (request.getAvatarAssetId() != null && request.getAvatarAssetId().isPresent()) {
             var asset = assetService.getAsset(organizationId, request.getAvatarAssetId().get());
             user.setAvatar(asset);
+        }
+
+        if (request.getLeavePolicyId() != null && request.getLeavePolicyId().isPresent()) {
+            var leavePolicy = leavePolicyService.getLeavePolicy(organizationId, request.getLeavePolicyId().get());
+            user.setLeavePolicy(leavePolicy);
+        }
+
+        if (request.getTeamId() != null && request.getTeamId().isPresent()) {
+            var team = teamService.getTeam(organizationId, request.getTeamId().get());
+            user.setTeam(team);
         }
 
         return userRepository.update(user);
