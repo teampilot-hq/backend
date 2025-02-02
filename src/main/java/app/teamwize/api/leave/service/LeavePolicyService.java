@@ -44,6 +44,7 @@ public class LeavePolicyService {
         for (var activatedType : leavePolicyCommand.activatedTypes()) {
             var type = leaveTypeService.getLeaveType(organizationId, activatedType.typeId());
             policy.getActivatedTypes().add(new LeavePolicyActivatedType()
+                    .setId(new LeavePolicyActivatedTypeId(policy.getId(), type.getId()))
                     .setType(type)
                     .setPolicy(policy)
                     .setAmount(activatedType.amount())
@@ -52,15 +53,15 @@ public class LeavePolicyService {
             );
         }
 
-        return leavePolicyRepository.persist(policy);
+        return leavePolicyRepository.merge(policy);
     }
 
     @Transactional
     public LeavePolicy createDefaultLeavePolicy(Long organizationId) throws OrganizationNotFoundException, LeaveTypeNotFoundException {
         var leaveTypes = leaveTypeService.createLeaveTypes(organizationId, List.of(
-                new LeaveTypeCommand("🏖️", "Vacation", LeaveTypeCycle.PER_MONTH, null, true),
+                new LeaveTypeCommand("🏖️", "Vacation", LeaveTypeCycle.PER_MONTH, 2, true),
                 new LeaveTypeCommand("🧳", "PTO", LeaveTypeCycle.PER_MONTH, 2, true),
-                new LeaveTypeCommand("🤒", "Sick-Leave", LeaveTypeCycle.PER_YEAR, null, false)
+                new LeaveTypeCommand("🤒", "Sick-Leave", LeaveTypeCycle.PER_YEAR, 30, false)
         ));
         var request = new LeavePolicyCommand("Default-Policy",
                 LeavePolicyStatus.DEFAULT,

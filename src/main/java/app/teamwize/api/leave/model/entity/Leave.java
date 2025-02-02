@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 
 @Getter
@@ -21,9 +21,9 @@ public class Leave extends BaseAuditEntity {
     @SequenceGenerator(name = "day_off_id_seq_generator", sequenceName = "day_off_id_seq", allocationSize = 1)
     protected Long id;
 
-    private LocalDateTime startAt;
+    private Instant startAt;
 
-    private LocalDateTime endAt;
+    private Instant endAt;
 
     @Enumerated(EnumType.STRING)
     private LeaveStatus status;

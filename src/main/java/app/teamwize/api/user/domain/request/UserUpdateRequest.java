@@ -2,11 +2,10 @@ package app.teamwize.api.user.domain.request;
 
 
 import app.teamwize.api.base.validator.PhoneNumber;
-import lombok.Data;
-import org.openapitools.jackson.nullable.JsonNullable;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 @Data
 public class UserUpdateRequest {
@@ -24,4 +23,8 @@ public class UserUpdateRequest {
 
     @PhoneNumber
     private JsonNullable<String> phone;
+
+    private JsonNullable<Long> leavePolicyId;
+
+    private JsonNullable<Long> teamId;
 }
