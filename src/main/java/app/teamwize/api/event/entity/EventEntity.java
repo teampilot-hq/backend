@@ -42,6 +42,6 @@ public class EventEntity extends BaseAuditEntity {
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<EventExecutionEntity> executions;
 }

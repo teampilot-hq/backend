@@ -7,7 +7,7 @@ public enum EventExitCode {
 
     HANDLER_NOT_FOUND,// No appropriate handler was found for the event type; event could not be processed due to lack of support
 
-    PROCESSING_ERROR, // An error occurred during event processing that prevented successful completion
+    ERROR, // An error occurred during event processing that prevented successful completion
 
     CONNECTION_ERROR, // Failed to connect to an external service required for event processing (e.g., email/SMS server)
 

@@ -2,7 +2,6 @@ package app.teamwize.api.leave.model.event;
 
 import app.teamwize.api.leave.model.LeaveStatus;
 import app.teamwize.api.leave.model.entity.Leave;
-import app.teamwize.api.leave.model.entity.LeavePolicyActivatedType;
 
 import java.time.Instant;
 
@@ -14,7 +13,7 @@ public record LeaveEventPayload(
 
         LeaveStatus status,
 
-        LeavePolicyActivatedType type,
+        LeavePolicyActivatedTypePayload type,
 
         String reason,
 
@@ -26,7 +25,7 @@ public record LeaveEventPayload(
                 leave.getStartAt(),
                 leave.getEndAt(),
                 leave.getStatus(),
-                leave.getActivatedType(),
+                new LeavePolicyActivatedTypePayload(leave.getActivatedType()),
                 leave.getReason(),
                 leave.getDuration()
         );

@@ -6,4 +6,5 @@ public enum EventType {
     LEAVE_CREATED,
     LEAVE_STATUS_UPDATED,
     TEAM_CREATED,
+    NOTIFICATION_CREATED,
 }

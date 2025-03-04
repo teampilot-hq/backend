@@ -12,6 +12,7 @@ import app.teamwize.api.event.repository.EventRepository;
 import app.teamwize.api.event.service.handler.EventHandler;
 import app.teamwize.api.organization.domain.entity.Organization;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,6 +29,7 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final EventExecutionRepository executionRepository;
+    @Lazy
     private final List<EventHandler> eventHandlers;
     private final EventMapper eventMapper;
 
@@ -36,15 +38,19 @@ public class EventService {
     public Event emmit(Long organizationId, EventType eventType, Map<String, Object> params, byte maxAttempts, Instant scheduledAt) {
         var executions = eventHandlers.stream().filter(eventHandler -> eventHandler.accepts(eventType)).map(eventHandler -> new EventExecutionEntity()
                 .setStatus(EventExecutionStatus.PENDING)
+                .setAttempts(0)
                 .setHandler(eventHandler.name())).toList();
         var event = new EventEntity()
                 .setOrganization(new Organization(organizationId))
                 .setType(eventType)
-                .setParams(Map.of())
+                .setParams(params)
                 .setStatus(EventStatus.PENDING)
                 .setMaxAttempts(maxAttempts)
                 .setScheduledAt(scheduledAt)
                 .setExecutions(executions);
+
+        executions.forEach(eventExecutionEntity -> eventExecutionEntity.setEvent(event));
+
         return eventMapper.toEvent(eventRepository.persist(event));
     }
 
@@ -58,7 +64,7 @@ public class EventService {
     // There is no need to have exitCode for events they are not jobs
 
     @Transactional
-    @Scheduled(fixedDelay = 60_000)
+    @Scheduled(fixedDelay = 10_000)
     public void processEvents() {
         var pendingEvents = eventRepository.findByStatus(EventStatus.PENDING);
         for (var pendingEvent : pendingEvents) {
@@ -82,7 +88,9 @@ public class EventService {
                 }
                 executionRepository.update(execution);
             }
+            pendingEvent.setStatus(EventStatus.FINISHED);
         }
+        eventRepository.updateAll(pendingEvents);
     }
 
     public Paged<Event> getEvents(Pagination pagination) {

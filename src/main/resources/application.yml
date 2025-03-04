@@ -27,6 +27,17 @@ app:
         secret: THIS_IS_THE_DEFAULT_RANDOM_STRING
         expiration-in-ms: '604800000'
 spring:
+  mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   jpa:
     properties:
       hibernate:
@@ -41,7 +52,7 @@ spring:
       ddl-auto: validate
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyComponentPathImpl
-    show-sql: true
+    show-sql: false
     open-in-view: false
   profiles:
     active: dev
