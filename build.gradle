@@ -58,16 +58,13 @@ dependencies {
 	testImplementation 'org.testcontainers:postgresql'
 }
 
-//tasks.withType<Test> {
-//	useJUnitPlatform()
-//}
 
 jib {
 	from {
 		image = 'mcr.microsoft.com/openjdk/jdk:21-distroless'
 	}
 	to {
-		image = 'ghcr.io/teamwize/api:dev'
+		image = 'ghcr.io/teampilot-hq/api:dev'
 		tags = ['dev']
 	}
 }
