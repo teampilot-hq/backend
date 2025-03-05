@@ -3,9 +3,12 @@ package app.teamwize.api.user.domain.request;
 
 import app.teamwize.api.base.validator.PhoneNumber;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.openapitools.jackson.nullable.JsonNullable;
+
+import java.time.Instant;
 
 @Data
 public class UserUpdateRequest {
@@ -27,4 +30,7 @@ public class UserUpdateRequest {
     private JsonNullable<Long> leavePolicyId;
 
     private JsonNullable<Long> teamId;
+
+    @NotNull
+    private JsonNullable<Instant> joinedAt;
 }

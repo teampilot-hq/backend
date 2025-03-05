@@ -2,6 +2,8 @@ package app.teamwize.api.user.domain.request;
 
 import app.teamwize.api.user.domain.UserRole;
 
+import java.time.Instant;
+
 public record UserCreateRequest(
         String email,
         String firstName,
@@ -12,5 +14,6 @@ public record UserCreateRequest(
         String timezone,
         String country,
         Long teamId,
-        Long leavePolicyId) {
+        Long leavePolicyId,
+        Instant joinedAt) {
 }
