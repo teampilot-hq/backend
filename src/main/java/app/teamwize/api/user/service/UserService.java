@@ -33,6 +33,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 import static app.teamwize.api.user.repository.UserSpecifications.*;
 
 @Slf4j
@@ -87,7 +89,8 @@ public class UserService {
                 .setCountry(request.country())
                 .setTeam(team)
                 .setOrganization(organization)
-                .setLeavePolicy(leavePolicy);
+                .setLeavePolicy(leavePolicy)
+                .setJoinedAt(Instant.now());
         user.setTeam(team);
         user.setPassword(passwordEncoder.encode(request.password()));
         return userRepository.merge(user);
@@ -116,7 +119,8 @@ public class UserService {
                 .setCountry(request.country())
                 .setTeam(team)
                 .setOrganization(organization)
-                .setLeavePolicy(leavePolicy);
+                .setLeavePolicy(leavePolicy)
+                .setJoinedAt(request.joinedAt() == null ? Instant.now() : request.joinedAt());
 
         if (request.password() != null && !request.password().isBlank()) {
             user.setPassword(passwordEncoder.encode(request.password()));
@@ -143,6 +147,10 @@ public class UserService {
         }
         if (request.getPhone() != null) {
             request.getPhone().ifPresent(user::setPhone);
+        }
+
+        if (request.getJoinedAt() != null) {
+            request.getJoinedAt().ifPresent(user::setJoinedAt);
         }
 
         if (request.getAvatarAssetId() != null && request.getAvatarAssetId().isPresent()) {

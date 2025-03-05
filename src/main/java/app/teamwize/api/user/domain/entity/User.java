@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Objects;
 
@@ -43,7 +44,7 @@ public class User extends BaseAuditEntity {
     private UserStatus status;
     @ManyToOne(fetch = FetchType.LAZY)
     private Asset avatar;
-
+    private Instant joinedAt;
     @ManyToOne
     private LeavePolicy leavePolicy;
 

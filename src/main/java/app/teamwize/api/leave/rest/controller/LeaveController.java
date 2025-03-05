@@ -94,7 +94,7 @@ public class LeaveController {
 
     @GetMapping("{id}")
     public LeaveResponse getDayOff(@PathVariable Long id) throws LeaveNotFoundException {
-        return leaveMapper.toLeaveResponse(leaveService.getLeave(securityService.getUserId(), id));
+        return leaveMapper.toLeaveResponse(leaveService.getLeave(securityService.getUserOrganizationId(), id));
     }
 
     @PostMapping("check")
