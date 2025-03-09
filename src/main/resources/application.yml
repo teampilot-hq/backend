@@ -87,12 +87,9 @@ management:
         include:
           - health
           - info
-          - gateway
-          - prometheus
+          - metrics
     enabled-by-default: false
   endpoint:
-    prometheus:
-      enabled: true
     health:
       enabled: true
       show-details: always
@@ -109,7 +106,3 @@ springdoc:
   api-docs:
     enabled: true
     path: /swagger-ui/openapi.json
-
-
-
-

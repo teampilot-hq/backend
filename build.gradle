@@ -60,7 +60,9 @@ dependencies {
 	testImplementation 'org.testcontainers:postgresql'
 }
 
-
+springBoot {
+	buildInfo()
+}
 jib {
 	from {
 		image = 'mcr.microsoft.com/openjdk/jdk:21-distroless'
