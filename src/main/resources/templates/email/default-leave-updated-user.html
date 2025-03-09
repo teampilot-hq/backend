@@ -20,18 +20,18 @@
         </p>
     </div>
 
-    {{#if leave.status == "ACCEPTED"}}
+    {{#eq leave.status "ACCEPTED"}}
     <div class="message success">
         <p>Your leave request has been <strong>approved</strong>. We've updated your calendar accordingly.</p>
     </div>
-    {{/if}}
+    {{/eq}}
 
-    {{#if leave.status == "REJECTED"}}
+    {{#eq leave.status "REJECTED"}}
     <div class="message rejected">
         <p>Unfortunately, your leave request has been <strong>declined</strong>. Please contact your manager if you have
             any questions.</p>
     </div>
-    {{/if}}
+    {{/eq}}
 
     <div class="button">
         <a class="view-button" href="{{baseUrl}}/leaves/{{leave.id}}">View Leave Details</a>

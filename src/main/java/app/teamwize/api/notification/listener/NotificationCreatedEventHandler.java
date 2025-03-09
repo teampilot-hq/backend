@@ -40,7 +40,6 @@ public class NotificationCreatedEventHandler implements EventHandler {
             var notificationPayload = objectMapper.writeValueAsString(event.params());
             var payload = objectMapper.readValue(notificationPayload, NotificationCreatedEvent.class);
 
-            log.info("Notification payload: {}", payload);
             for (var notifier : notifiers) {
                 for (NotificationChannel channel : payload.notification().channels()) {
                     if (notifier.accepts(channel)) {

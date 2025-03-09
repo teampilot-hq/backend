@@ -18,13 +18,13 @@ Reason Provided: {{leave.reason}}
 {{/if}}
 
 
-{{#if leave.status == "ACCEPTED"}}
+{{#eq leave.status "ACCEPTED"}}
 Your leave request has been APPROVED. We've updated your calendar accordingly.
-{{/if}}
+{{/eq}}
 
-{{#if leave.status == "REJECTED"}}
+{{#eq leave.status "REJECTED"}}
 Unfortunately, your leave request has been DECLINED. Please contact your manager if you have any questions.
-{{/if}}
+{{/eq}}
 
 To view the complete details of your leave request, please visit:
 {{baseUrl}}/leaves/{{leave.id}}

@@ -7,5 +7,10 @@ public enum LeaveStatus {
     ACCEPTED,
     REJECTED,
     @JsonEnumDefaultValue
-    PENDING
+    PENDING;
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }
