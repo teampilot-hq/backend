@@ -1,0 +1,43 @@
+<div class="header">
+    <h1>Update on Your Leave Request</h1>
+</div>
+
+<div class="content">
+    <p>Hello {{user.firstName}},</p>
+
+    <p>Your leave request status has been updated.</p>
+
+    <div class="leave-details">
+        <h3>Leave Request Details</h3>
+        <p>
+            <strong>Leave ID:</strong> {{leave.id}}<br>
+            <strong>Type:</strong> {{leave.type.name}}<br>
+            <strong>Policy:</strong> {{leave.type.policyName}}<br>
+            <strong>Duration:</strong> {{leave.duration}} day(s)<br>
+            <strong>Start Date:</strong> {{formatDate leave.startAt}}<br>
+            <strong>End Date:</strong> {{formatDate leave.endAt}}<br>
+            <strong>Status:</strong> <span class="status-badge status-{{leave.status}}">{{leave.status}}</span><br>
+        </p>
+    </div>
+
+    {{#if leave.status == "ACCEPTED"}}
+    <div class="message success">
+        <p>Your leave request has been <strong>approved</strong>. We've updated your calendar accordingly.</p>
+    </div>
+    {{/if}}
+
+    {{#if leave.status == "REJECTED"}}
+    <div class="message rejected">
+        <p>Unfortunately, your leave request has been <strong>declined</strong>. Please contact your manager if you have
+            any questions.</p>
+    </div>
+    {{/if}}
+
+    <div class="button">
+        <a class="view-button" href="{{baseUrl}}/leaves/{{leave.id}}">View Leave Details</a>
+    </div>
+
+    <p>If you have any questions regarding this update, please contact your manager or HR department.</p>
+
+    <p>Thank you,<br> Human Resources Team</p>
+</div>

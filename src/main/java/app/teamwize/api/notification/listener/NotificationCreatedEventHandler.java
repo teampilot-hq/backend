@@ -1,6 +1,6 @@
-package app.teamwize.api.notification.service;
+package app.teamwize.api.notification.listener;
 
-import app.teamwize.api.event.entity.EventEntity;
+import app.teamwize.api.event.model.Event;
 import app.teamwize.api.event.model.EventExitCode;
 import app.teamwize.api.event.model.EventType;
 import app.teamwize.api.event.service.handler.EventHandler;
@@ -8,7 +8,6 @@ import app.teamwize.api.notification.exception.NotificationSendFailureException;
 import app.teamwize.api.notification.model.NotificationChannel;
 import app.teamwize.api.notification.model.event.NotificationCreatedEvent;
 import app.teamwize.api.notification.service.notifier.Notifier;
-import app.teamwize.api.user.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +23,6 @@ public class NotificationCreatedEventHandler implements EventHandler {
 
     private final ObjectMapper objectMapper;
     private final List<Notifier> notifiers;
-    private final UserService userService;
 
     @Override
     public String name() {
@@ -37,16 +35,16 @@ public class NotificationCreatedEventHandler implements EventHandler {
     }
 
     @Override
-    public EventExecutionResult process(EventEntity eventEntity) {
+    public EventExecutionResult process(Event event) {
         try {
-            var notificationPayload = objectMapper.writeValueAsString(eventEntity.getParams());
-            var event = objectMapper.readValue(notificationPayload, NotificationCreatedEvent.class);
+            var notificationPayload = objectMapper.writeValueAsString(event.params());
+            var payload = objectMapper.readValue(notificationPayload, NotificationCreatedEvent.class);
 
-            log.info("Notification payload: {}", event);
+            log.info("Notification payload: {}", payload);
             for (var notifier : notifiers) {
-                for (NotificationChannel channel : event.notification().channels()) {
+                for (NotificationChannel channel : payload.notification().channels()) {
                     if (notifier.accepts(channel)) {
-                        notifier.notify(event.notification());
+                        notifier.notify(payload.notification());
                     }
                 }
             }

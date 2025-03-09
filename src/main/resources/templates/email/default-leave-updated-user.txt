@@ -1,0 +1,35 @@
+UPDATE ON YOUR LEAVE REQUEST
+
+Hello {{user.firstName}},
+
+Your leave request status has been updated.
+
+LEAVE REQUEST DETAILS
+-------------------
+Leave ID: {{leave.id}}
+Type: {{leave.type.name}}
+Policy: {{leave.type.policyName}}
+Duration: {{leave.duration}} day(s)
+Start Date: {{formatDate leave.startAt}}
+End Date: {{formatDate leave.endAt}}
+Status: {{leave.status}}
+{{#if leave.reason}}
+Reason Provided: {{leave.reason}}
+{{/if}}
+
+
+{{#if leave.status == "ACCEPTED"}}
+Your leave request has been APPROVED. We've updated your calendar accordingly.
+{{/if}}
+
+{{#if leave.status == "REJECTED"}}
+Unfortunately, your leave request has been DECLINED. Please contact your manager if you have any questions.
+{{/if}}
+
+To view the complete details of your leave request, please visit:
+{{baseUrl}}/leaves/{{leave.id}}
+
+If you have any questions regarding this update, please contact your manager or HR department.
+
+Thank you,
+Human Resources Team

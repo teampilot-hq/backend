@@ -3,6 +3,7 @@ package app.teamwize.api.notification.service;
 import app.teamwize.api.base.domain.model.Paged;
 import app.teamwize.api.base.domain.model.request.PaginationRequest;
 import app.teamwize.api.event.service.EventService;
+import app.teamwize.api.notification.config.NotificationConfigModel;
 import app.teamwize.api.notification.exception.NotificationTemplateCompileException;
 import app.teamwize.api.notification.exception.NotificationTriggerNotFoundException;
 import app.teamwize.api.notification.mapper.NotificationMapper;
@@ -42,6 +43,7 @@ public class NotificationService {
     private final NotificationTriggerMapper notificationTriggerMapper;
     private final OrganizationService organizationService;
     private final UserService userService;
+    private final NotificationConfigModel config;
     @Lazy
     private final EventService eventService;
     private final Handlebars handlebars;
@@ -55,6 +57,8 @@ public class NotificationService {
 
         var trigger = triggerService.getNotificationTrigger(organizationId, command.triggerId());
         var organization = organizationService.getOrganization(organizationId);
+
+        entity.getParams().put("baseUrl", config.email().baseUrl());
 
         try {
             var textContent = handlebars.compile(new StringTemplateSource("notification", trigger.textTemplate())).apply(entity.getParams());

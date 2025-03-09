@@ -1,0 +1,44 @@
+<div class="header">
+    <h1>New Leave Request Requires Approval</h1>
+</div>
+
+<div class="content">
+    <p>A new leave request has been submitted that requires your review and approval.</p>
+
+    <div class="employee-info">
+        <h3>Employee Information</h3>
+        <p>
+            <strong>Name:</strong> {{user.firstName}} {{user.lastName}}<br>
+            <strong>Email:</strong> {{user.email}}<br>
+            <strong>Phone:</strong> {{user.phone}}<br>
+            <strong>Team ID:</strong> {{user.teamId}}<br>
+            <strong>Country:</strong> {{user.country}}<br>
+            <strong>Timezone:</strong> {{user.timezone}}
+        </p>
+    </div>
+
+    <div class="leave-details">
+        <h3>Leave Request Details</h3>
+        <p>
+            <strong>Leave ID:</strong> {{leave.id}}<br>
+            <strong>Type:</strong> {{leave.type.name}}<br>
+            <strong>Policy:</strong> {{leave.type.policyName}} (ID: {{leave.type.policyId}})<br>
+            <strong>Duration:</strong> {{leave.duration}} day(s)<br>
+            <strong>Start Date:</strong> {{leave.startAt}}<br>
+            <strong>End Date:</strong> {{leave.endAt}}<br>
+            <strong>Status:</strong> <span class="status-badge">{{leave.status}}</span><br>
+            {{#if leave.reason}}
+            <strong>Reason:</strong> {{leave.reason}}
+            {{/if}}
+        </p>
+    </div>
+
+    <div class="button">
+        <a class="review-button" href="{{baseUrl}}/leaves/">Review Leave Request</a>
+    </div>
+
+    <p>Please review this request in the leave management portal where you can approve or reject it based on your
+        organization's policies.</p>
+
+    <p>Thank you,<br> Human Resources Team</p>
+</div>

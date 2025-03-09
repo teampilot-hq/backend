@@ -1,6 +1,13 @@
 server:
   port: 8001
 app:
+  notification:
+    email:
+      from:
+      unsubscribe-url:
+      company-name:
+      base-template:
+      base-url:
   storage:
     temp-directory: ${java.io.tmpdir}
     base-preview-url: https://teamwize.app/assets/preview

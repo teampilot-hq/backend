@@ -59,20 +59,17 @@ public class EventService {
         return emmit(organizationId, eventPayload.name(), eventPayload.payload(), (byte) 3, Instant.now());
     }
 
-
-    // Maybe it's better to try forever to execute an event
-    // There is no need to have exitCode for events they are not jobs
-
     @Transactional
-    @Scheduled(fixedDelay = 10_000)
+    @Scheduled(fixedDelay = 1_000)
     public void processEvents() {
         var pendingEvents = eventRepository.findByStatus(EventStatus.PENDING);
         for (var pendingEvent : pendingEvents) {
-            for (var execution : pendingEvent.getExecutions()) {
+            var pendingExecutions = pendingEvent.getExecutions().stream().filter(execution -> execution.getStatus() == EventExecutionStatus.PENDING || execution.getStatus() == EventExecutionStatus.RETRYING).toList();
+            for (var execution : pendingExecutions) {
                 var handlerOptional = eventHandlers.stream().filter(eventHandler -> eventHandler.name().equals(execution.getHandler())).findFirst();
                 if (handlerOptional.isEmpty()) continue;
                 var handler = handlerOptional.get();
-                var executionResult = handler.process(pendingEvent);
+                var executionResult = handler.process(eventMapper.toEvent(pendingEvent));
                 if (executionResult.exitCode() == EventExitCode.SUCCESS) {
                     execution.setStatus(EventExecutionStatus.FINISHED);
                 } else {
@@ -88,7 +85,11 @@ public class EventService {
                 }
                 executionRepository.update(execution);
             }
-            pendingEvent.setStatus(EventStatus.FINISHED);
+            if (pendingExecutions.stream().allMatch(execution -> execution.getStatus() == EventExecutionStatus.FINISHED)) {
+                pendingEvent.setStatus(EventStatus.FINISHED);
+            } else {
+                pendingEvent.setStatus(EventStatus.PENDING);
+            }
         }
         eventRepository.updateAll(pendingEvents);
     }

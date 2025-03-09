@@ -6,4 +6,5 @@ public enum NotificationTriggerReceptors {
     TEAM_ADMIN,
     ORGANIZATION_ADMIN,
     ALL_TEAM_MEMBERS,
+    REVIEWERS,
 }

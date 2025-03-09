@@ -1,0 +1,33 @@
+NEW LEAVE REQUEST REQUIRES APPROVAL
+
+A new leave request has been submitted that requires your review and approval.
+
+EMPLOYEE INFORMATION
+-------------------
+Name: {{user.firstName}} {{user.lastName}}
+Email: {{user.email}}
+Phone: {{user.phone}}
+Team ID: {{user.teamId}}
+Country: {{user.country}}
+Timezone: {{user.timezone}}
+
+LEAVE REQUEST DETAILS
+-------------------
+Leave ID: {{leave.id}}
+Type: {{leave.type.name}}
+Policy: {{leave.type.policyName}} (ID: {{leave.type.policyId}})
+Duration: {{leave.duration}} day(s)
+Start Date: {{leave.startAt}}
+End Date: {{leave.endAt}}
+Status: {{leave.status}}
+{{#if leave.reason}}
+Reason: {{leave.reason}}
+{{/if}}
+
+To review this leave request, please visit:
+{{baseUrl}}/leaves/
+
+Please review this request in the leave management portal where you can approve or reject it based on your organization's policies.
+
+Thank you,
+Human Resources Team
