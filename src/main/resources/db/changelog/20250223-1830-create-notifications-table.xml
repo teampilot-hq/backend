@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="20250223-1800-create-notifications-table" author="M.Karimi">
+        <createTable tableName="notifications">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="template_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trigger_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="receptor" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="organization_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text_content" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="html_content" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="params" type="JSONB">
+                <constraints nullable="true"/>
+            </column>
+            <column name="channels" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sent_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="status" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="metadata" type="JSONB">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <createSequence sequenceName="notification_id_seq" startValue="1" incrementBy="10"/>
+
+        <addForeignKeyConstraint
+                baseTableName="notifications"
+                baseColumnNames="template_id"
+                referencedTableName="notification_templates"
+                referencedColumnNames="id"
+                constraintName="fk_notifications_template_id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="notifications"
+                baseColumnNames="trigger_id"
+                referencedTableName="notification_triggers"
+                referencedColumnNames="id"
+                constraintName="fk_notifications_trigger_id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="notifications"
+                baseColumnNames="organization_id"
+                referencedTableName="organizations"
+                referencedColumnNames="id"
+                constraintName="fk_notifications_organization_id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="notifications"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_notifications_user_id"/>
+    </changeSet>
+    <changeSet id="20250224-1800-remove-receptor-field-in-notifications-table" author="M.Karimi">
+        <dropColumn tableName="notifications" columnName="receptor"/>
+        <modifyDataType tableName="notifications" columnName="channels" newDataType="VARCHAR[]"/>
+    </changeSet>
+
+    <changeSet id="20250301-1259-remove-notification-template-table" author="Mohsen Karimi">
+        <dropForeignKeyConstraint baseTableName="notifications" constraintName="fk_notifications_template_id"/>
+        <dropForeignKeyConstraint baseTableName="notification_triggers"
+                                  constraintName="fk_notification_triggers_template_id"/>
+        <dropColumn tableName="notification_triggers" columnName="template_id"/>
+        <dropColumn tableName="notifications" columnName="template_id"/>
+        <dropTable tableName="notification_templates"/>
+        <addColumn tableName="notification_triggers">
+            <column name="title" type="VARCHAR(255)"/>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text_template" type="TEXT"/>
+            <column name="html_template" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20250301-2359-add-title-to-notification-table" author="M.Karimi">
+        <addColumn tableName="notifications">
+            <column name="title" type="VARCHAR"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog> 
