@@ -17,6 +17,7 @@ import app.teamwize.api.leave.model.command.LeaveCreateCommand;
 import app.teamwize.api.leave.model.command.LeaveUpdateCommand;
 import app.teamwize.api.leave.model.entity.Leave;
 import app.teamwize.api.leave.model.entity.LeavePolicyActivatedTypeId;
+import app.teamwize.api.leave.model.event.LeaveCreatedEvent;
 import app.teamwize.api.leave.model.event.LeaveEventPayload;
 import app.teamwize.api.leave.model.event.LeaveStatusUpdatedEvent;
 import app.teamwize.api.leave.repository.LeaveRepository;
@@ -83,7 +84,7 @@ public class LeaveService {
         dayOff = leaveRepository.persist(dayOff);
 
 
-        // eventService.emmit(organizationId, new LeaveCreatedEvent(new LeaveEventPayload(dayOff), new UserEventPayload(user)));
+        eventService.emmit(organizationId, new LeaveCreatedEvent(new LeaveEventPayload(dayOff), new UserEventPayload(user)));
 
         return dayOff;
     }

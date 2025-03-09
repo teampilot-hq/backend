@@ -1,0 +1,56 @@
+<div class="header">
+    <h1>Leave Request Created</h1>
+</div>
+<div class="content">
+    <p>Hello {{user.firstName}} {{user.lastName}},</p>
+    <p>Your leave request has been successfully created with the following details:</p>
+    <div class="leave-details">
+        <div class="leave-item">
+            <span class="leave-label">Leave Type:</span>
+            <span>{{leave.type.name}}</span>
+        </div>
+
+        <div class="leave-item">
+            <span class="leave-label">Start Date:</span>
+            <span>{{leave.startAt}}</span>
+        </div>
+
+        <div class="leave-item">
+            <span class="leave-label">End Date:</span>
+            <span>{{leave.endAt}}</span>
+        </div>
+
+        <div class="leave-item">
+            <span class="leave-label">Duration:</span>
+            <span>{{leave.duration}} day(s)</span>
+        </div>
+
+        <div class="leave-item">
+            <span class="leave-label">Reason:</span>
+            <span>{{leave.reason}}</span>
+        </div>
+
+        <div class="leave-item">
+            <span class="leave-label">Status:</span>
+            <span class="status status-pending">{{leave.status}}</span>
+        </div>
+
+        <div class="leave-item">
+            <span class="leave-label">Request ID:</span>
+            <span>#{{leave.id}}</span>
+        </div>
+    </div>
+
+    {{#if leave.type.requiresApproval}}
+    <p>Your request requires approval. You will be notified once a decision has been made.</p>
+    {{else}}
+    <p>Your request has been automatically approved according to the {{leave.type.policyName}} policy.</p>
+    {{/if}}
+
+    <p>If you have any questions about your leave request, please contact your team administrator.</p>
+
+    <p>Thank you,<br> Human Resources Team</p>
+</div>
+<div class="footer">
+    <p>This is an automated email. Please do not reply to this message.</p>
+</div>

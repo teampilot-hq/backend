@@ -35,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
+import java.util.List;
+
 import static app.teamwize.api.user.repository.UserSpecifications.*;
 
 @Slf4j
@@ -58,6 +60,11 @@ public class UserService {
 
     public User getUser(long organizationId, long userId) throws UserNotFoundException {
         return getById(organizationId, userId);
+    }
+
+    public User getUserByEmail(Long organizationId, String email) throws UserNotFoundException {
+        return userRepository.findByOrganizationIdAndEmail(organizationId, email)
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     public User getUserByEmail(String email) throws UserNotFoundException {
@@ -200,6 +207,14 @@ public class UserService {
         var user = getById(organizationId, userId);
         user.setPassword(passwordEncoder.encode(password));
         userRepository.update(user);
+    }
+
+    public List<User> getUsersByTeam(Long organizationId, Long teamId, List<UserRole> roles) {
+        return userRepository.findByOrganizationIdAndTeamIdAndRoleIsIn(organizationId, teamId, roles);
+    }
+
+    public List<User> getUsersByRole(Long organizationId, UserRole role) {
+        return userRepository.findByOrganizationIdAndRole(organizationId, role);
     }
 
     private User getById(Long organizationId, Long userId) throws UserNotFoundException {

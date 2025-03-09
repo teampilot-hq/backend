@@ -1,0 +1,19 @@
+Your leave request has been successfully created with the following details:
+
+Leave Type: {{leave.type.name}}
+Start Date: {{leave.startAt}}
+End Date: {{leave.endAt}}
+Duration: {{leave.duration}} day(s)
+Reason: {{leave.reason}}
+Status: {{leave.status}}
+
+{{#if leave.type.requiresApproval}}
+Your request requires approval. You will be notified once a decision has been made.
+{{else}}
+Your request has been automatically approved according to the {{leave.type.policyName}} policy.
+{{/if}}
+
+If you have any questions about your leave request, please contact your team administrator.
+
+Thank you,
+Human Resources Team

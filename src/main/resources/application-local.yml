@@ -2,4 +2,20 @@ spring:
   jpa:
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
+  mail:
+    host: smtp.zoho.com
+    port: 587
+    password: 431069562Oo!
+    username: me@mohsen.work
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            trust: smtp.zoho.com
+          from: me@mohsen.work
+          socketFactory:
+            port: 587
+          starttls:
+            enable: true

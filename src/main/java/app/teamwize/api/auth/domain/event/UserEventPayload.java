@@ -7,23 +7,26 @@ public record UserEventPayload(
         Long id,
         UserRole role,
         String email,
-        String password,
         String phone,
         String firstName,
         String lastName,
         String country,
-        String timezone) {
+        String timezone,
+        Long teamId,
+        Long organizationId
+) {
 
     public UserEventPayload(User user) {
         this(user.getId(),
                 user.getRole(),
                 user.getEmail(),
-                user.getPassword(),
                 user.getPhone(),
                 user.getFirstName(),
                 user.getLastName(),
                 user.getCountry(),
-                user.getTimezone()
+                user.getTimezone(),
+                user.getTeam().getId(),
+                user.getOrganization().getId()
         );
     }
 }
