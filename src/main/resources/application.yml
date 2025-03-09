@@ -6,7 +6,7 @@ app:
       from:
       unsubscribe-url:
       company-name:
-      base-template:
+      base-template: "classpath:templates/email/layout.html"
       base-url:
   storage:
     temp-directory: ${java.io.tmpdir}
