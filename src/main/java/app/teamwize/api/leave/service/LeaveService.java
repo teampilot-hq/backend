@@ -26,6 +26,7 @@ import app.teamwize.api.leave.rest.model.request.LeaveFilterRequest;
 import app.teamwize.api.organization.domain.entity.Organization;
 import app.teamwize.api.organization.exception.OrganizationNotFoundException;
 import app.teamwize.api.organization.service.OrganizationService;
+import app.teamwize.api.user.domain.UserRole;
 import app.teamwize.api.user.domain.entity.User;
 import app.teamwize.api.user.exception.UserNotFoundException;
 import app.teamwize.api.user.service.UserService;
@@ -118,19 +119,25 @@ public class LeaveService {
 
 
     @Transactional
-    public Leave updateLeave(Long organizationId, Long userId, Long id, LeaveUpdateCommand request) throws LeaveNotFoundException, LeaveUpdateStatusFailedException, UserNotFoundException {
-        var user = userService.getUser(organizationId, userId);
-        var leave = getById(userId, id);
+    public Leave updateLeave(Long organizationId, Long approverId, Long id, LeaveUpdateCommand request) throws LeaveNotFoundException, LeaveUpdateStatusFailedException, UserNotFoundException {
+        var approverUser = userService.getUser(organizationId, approverId);
+        if (approverUser.getRole() != UserRole.ORGANIZATION_ADMIN && approverUser.getRole() != UserRole.TEAM_ADMIN) {
+            throw new LeaveUpdateStatusFailedException("Leave update failed because user is not authorized to update leave, id = " + id);
+        }
+        var leave = leaveRepository.findByOrganizationIdAndId(organizationId, id).orElseThrow(() -> new LeaveNotFoundException("Leave not found with id: " + id));
+        if (approverUser.getRole() == UserRole.TEAM_ADMIN && !leave.getUser().getTeam().getId().equals(approverUser.getTeam().getId())) {
+            throw new LeaveUpdateStatusFailedException("Leave update failed because user is not authorized to update leave, id = " + id);
+        }
         if (leave.getStatus() != LeaveStatus.PENDING) {
             throw new LeaveUpdateStatusFailedException("Leave update failed because it is not in pending status, id = " + id);
         }
         leave.setStatus(request.status());
-        eventService.emmit(organizationId, new LeaveStatusUpdatedEvent(new LeaveEventPayload(leave), new UserEventPayload(user)));
+        eventService.emmit(organizationId, new LeaveStatusUpdatedEvent(new LeaveEventPayload(leave), new UserEventPayload(approverUser)));
         return leaveRepository.update(leave);
     }
 
-    public Leave getLeave(Long userId, Long id) throws LeaveNotFoundException {
-        return getById(userId, id);
+    public Leave getLeave(Long organizationId, Long id) throws LeaveNotFoundException {
+        return getById(organizationId, id);
     }
 
     public Float getTotalDuration(Long organizationId, Long userId, LeavePolicyActivatedTypeId activatedTypeId, LeaveStatus status) {
@@ -138,14 +145,14 @@ public class LeaveService {
         return sum != null ? sum : 0f;
     }
 
-    private Leave getById(Long userId, Long id) throws LeaveNotFoundException {
-        return leaveRepository.findByUserIdAndId(userId, id).orElseThrow(() -> new LeaveNotFoundException("Leave not found with id: " + id));
+    private Leave getById(Long OrganizationId, Long id) throws LeaveNotFoundException {
+        return leaveRepository.findByOrganizationIdAndId(OrganizationId, id).orElseThrow(() -> new LeaveNotFoundException("Leave not found with id: " + id));
     }
 
     public List<UserLeaveBalance> getLeaveBalance(Long organizationId, Long userId) throws UserNotFoundException, LeavePolicyNotFoundException {
         var user = userService.getUser(organizationId, userId);
         var policy = leavePolicyService.getLeavePolicy(organizationId, user.getLeavePolicy().getId());
-        var startedAt = user.getCreatedAt();
+        var startedAt = user.getJoinedAt();
         var result = new ArrayList<UserLeaveBalance>();
         for (var activatedType : policy.getActivatedTypes()) {
             var usedAmount = this.getTotalDuration(organizationId, userId, activatedType.getId(), LeaveStatus.ACCEPTED);
@@ -154,9 +161,9 @@ public class LeaveService {
                 case PER_MONTH ->
                         Period.between(startedAt.atZone(user.getTimeZoneId()).toLocalDate(), LocalDate.now()).toTotalMonths() * activatedType.getAmount();
                 case PER_YEAR ->
-                        (Period.between(startedAt.atZone(user.getTimeZoneId()).toLocalDate(), LocalDate.now()).toTotalMonths() / 12) * activatedType.getAmount();
+                        (Period.between(startedAt.atZone(user.getTimeZoneId()).toLocalDate(), LocalDate.now()).toTotalMonths() / 12f) * activatedType.getAmount();
             };
-            result.add(new UserLeaveBalance(activatedType, usedAmount.longValue(), totalAmount, startedAt.atZone(user.getTimeZoneId()).toLocalDate()));
+            result.add(new UserLeaveBalance(activatedType, usedAmount.longValue(), (long) totalAmount, startedAt.atZone(user.getTimeZoneId()).toLocalDate()));
         }
         return result;
     }

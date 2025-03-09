@@ -18,8 +18,7 @@ import java.util.Optional;
 public interface LeaveRepository extends BaseJpaRepository<Leave, Long>, JpaSpecificationExecutor<Leave> {
 
     @EntityGraph(attributePaths = {"user", "user.team", "user.avatar", "type", "activatedType"}, type = EntityGraph.EntityGraphType.FETCH)
-    Optional<Leave> findByUserIdAndId(Long userId, Long id);
-
+    Optional<Leave> findByOrganizationIdAndId(Long organizationId, Long id);
 
     @EntityGraph(attributePaths = {"user", "user.team", "user.avatar", "type", "activatedType"}, type = EntityGraph.EntityGraphType.FETCH)
     Page<Leave> findByOrganizationIdAndUserId(Long organizationId, Long userId, Pageable page);
