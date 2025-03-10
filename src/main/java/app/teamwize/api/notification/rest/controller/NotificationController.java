@@ -5,12 +5,14 @@ import app.teamwize.api.base.domain.model.request.PaginationRequest;
 import app.teamwize.api.base.domain.model.response.PagedResponse;
 import app.teamwize.api.base.mapper.PagedResponseMapper;
 import app.teamwize.api.notification.exception.NotificationTriggerNotFoundException;
+import app.teamwize.api.notification.model.NotificationStatus;
 import app.teamwize.api.notification.rest.mapper.NotificationRestMapper;
 import app.teamwize.api.notification.rest.model.request.NotificationFilterRequest;
 import app.teamwize.api.notification.rest.model.request.NotificationTriggerCreateRequest;
 import app.teamwize.api.notification.rest.model.request.NotificationTriggerUpdateRequest;
 import app.teamwize.api.notification.rest.model.response.NotificationResponse;
 import app.teamwize.api.notification.rest.model.response.NotificationTriggerResponse;
+import app.teamwize.api.notification.rest.model.response.NotificationsCountResponse;
 import app.teamwize.api.notification.service.EventSchemaService;
 import app.teamwize.api.notification.service.NotificationService;
 import app.teamwize.api.notification.service.NotificationTriggerService;
@@ -52,6 +54,19 @@ public class NotificationController {
                 result.totalPages(),
                 result.totalContents()
         );
+    }
+
+    @GetMapping("count")
+    public NotificationsCountResponse getUnreadNotificationsCount() {
+        var unreadCount = notificationService.getNotificationsCount(securityService.getUserOrganizationId(), securityService.getUserId(), List.of(NotificationStatus.SENT));
+        var totalCount = notificationService.getNotificationsCount(securityService.getUserOrganizationId(), securityService.getUserId(), List.of(NotificationStatus.SENT, NotificationStatus.READ));
+        return new NotificationsCountResponse(unreadCount, totalCount);
+    }
+
+    @PatchMapping("read")
+    public NotificationsCountResponse markAsRead(@RequestBody List<Long> ids) {
+        notificationService.markAsRead(securityService.getUserOrganizationId(), securityService.getUserId(), ids);
+        return getUnreadNotificationsCount();
     }
 
     @PostMapping("triggers")

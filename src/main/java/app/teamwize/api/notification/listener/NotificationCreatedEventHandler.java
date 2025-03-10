@@ -6,7 +6,9 @@ import app.teamwize.api.event.model.EventType;
 import app.teamwize.api.event.service.handler.EventHandler;
 import app.teamwize.api.notification.exception.NotificationSendFailureException;
 import app.teamwize.api.notification.model.NotificationChannel;
+import app.teamwize.api.notification.model.NotificationStatus;
 import app.teamwize.api.notification.model.event.NotificationCreatedEvent;
+import app.teamwize.api.notification.service.NotificationService;
 import app.teamwize.api.notification.service.notifier.Notifier;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NotificationCreatedEventHandler implements EventHandler {
 
+    private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
     private final List<Notifier> notifiers;
 
@@ -47,6 +50,14 @@ public class NotificationCreatedEventHandler implements EventHandler {
                     }
                 }
             }
+
+            notificationService.updateNotificationStatus(
+                    event.organization().getId(),
+                    payload.notification().user().id(),
+                    payload.notification().id(),
+                    NotificationStatus.SENT
+            );
+
             return new EventExecutionResult(EventExitCode.SUCCESS, null);
         } catch (JsonProcessingException | NotificationSendFailureException e) {
             return new EventExecutionResult(EventExitCode.ERROR, null);

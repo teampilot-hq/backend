@@ -124,4 +124,18 @@ public class NotificationService {
                 page.getTotalElements()
         );
     }
+
+    public Long getNotificationsCount(Long organizationId, Long userId, List<NotificationStatus> statuses) {
+        return notificationRepository.countByOrganizationIdAndUserIdAndStatusIsIn(organizationId, userId, statuses);
+    }
+
+    @Transactional
+    public Integer markAsRead(Long organizationId, Long userId, List<Long> ids) {
+        return notificationRepository.updateNotificationsStatus(organizationId, userId, ids, NotificationStatus.READ);
+    }
+
+    @Transactional
+    public Integer updateNotificationStatus(Long organizationId, Long userId, Long id, NotificationStatus status) {
+        return notificationRepository.updateNotificationsStatus(organizationId, userId, List.of(id), status);
+    }
 }
