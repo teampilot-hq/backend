@@ -37,12 +37,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -169,22 +167,30 @@ public class LeaveService {
     }
 
     private Float calculateLeaveDuration(Organization organization, User user, Instant start, Instant end) {
-        var startDate = start.atZone(ZoneId.of(organization.getTimezone())).toLocalDate();
-        var endDate = end.atZone(ZoneId.of(organization.getTimezone())).toLocalDate();
+        var orgZone = ZoneId.of(organization.getTimezone());
+        var startDate = start.atZone(orgZone).toLocalDate();
+        var endDate = end.atZone(orgZone).toLocalDate();
+
+        if (endDate.isBefore(startDate)) {
+            return 0.0f;
+        }
 
         var holidayDates = holidayService.getHolidays(organization.getId(), startDate, endDate, user.getCountry())
                 .stream()
                 .map(Holiday::getDate)
                 .collect(Collectors.toSet());
 
-        var workingDays = Arrays.stream(organization.getWorkingDays()).collect(Collectors.toSet());
+        var workingDays = new HashSet<>(Arrays.asList(organization.getWorkingDays()));
 
-        var leaveDays = startDate.datesUntil(endDate)
-                .filter(date -> !holidayDates.contains(date))
-                .filter(date -> workingDays.contains(date.getDayOfWeek()))
-                .count();
-
-        return (float) leaveDays;
+        var currentDate = startDate;
+        var leaveDays = 0f;
+        while (!currentDate.isAfter(endDate)) {
+            if (workingDays.contains(currentDate.getDayOfWeek()) && !holidayDates.contains(currentDate)) {
+                leaveDays++;
+            }
+            currentDate = currentDate.plusDays(1);
+        }
+        return leaveDays;
     }
 
     public LeaveCheckResult checkRequestedLeave(Long organizationId, Long userId, LeaveCheckCommand command)
@@ -202,12 +208,14 @@ public class LeaveService {
                 new PaginationRequest(0, 1000)
         ).getContent();
         var leaveDuration = calculateLeaveDuration(organization, user, command.start(), command.end());
+        var diff = Duration.between(command.start(), command.end()).toDays() + 1.f;
         var holidays = holidayService.getHolidays(organization.getId(), startDate, endDate, user.getCountry());
 
         return new LeaveCheckResult(
                 true,
                 "You are allowed to request this leave",
                 leaveDuration,
+                diff,
                 currentUserLeaves,
                 teamLeaves,
                 holidays

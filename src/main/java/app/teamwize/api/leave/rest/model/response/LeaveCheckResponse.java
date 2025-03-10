@@ -8,6 +8,7 @@ public record LeaveCheckResponse(
         Boolean isAllowed,
         String message,
         Float duration,
+        Float totalDays,
         List<LeaveResponse> yourConflicts,
         List<LeaveResponse> teamConflicts,
         List<HolidayResponse> holidays) {
