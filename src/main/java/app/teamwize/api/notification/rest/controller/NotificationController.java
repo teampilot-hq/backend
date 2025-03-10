@@ -63,7 +63,7 @@ public class NotificationController {
         return new NotificationsCountResponse(unreadCount, totalCount);
     }
 
-    @PatchMapping("read")
+    @PostMapping("read")
     public NotificationsCountResponse markAsRead(@RequestBody List<Long> ids) {
         notificationService.markAsRead(securityService.getUserOrganizationId(), securityService.getUserId(), ids);
         return getUnreadNotificationsCount();
