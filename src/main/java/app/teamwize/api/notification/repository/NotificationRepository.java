@@ -13,10 +13,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NotificationRepository extends BaseJpaRepository<NotificationEntity, Long>, JpaSpecificationExecutor<NotificationEntity> {
-    List<NotificationEntity> findByOrganizationId(Long organizationId);
 
     @EntityGraph(attributePaths = {"trigger", "user"}, type = EntityGraph.EntityGraphType.FETCH)
     Page<NotificationEntity> findAll(Specification<NotificationEntity> spec, Pageable pageable);
@@ -27,4 +27,6 @@ public interface NotificationRepository extends BaseJpaRepository<NotificationEn
     @Query("update NotificationEntity n set n.status = :notificationStatus where n.organization.id = :organizationId and n.user.id = :userId and n.id in :ids")
     Integer updateNotificationsStatus(Long organizationId, Long userId, List<Long> ids, NotificationStatus notificationStatus);
 
+    @EntityGraph(attributePaths = {"trigger", "user"}, type = EntityGraph.EntityGraphType.FETCH)
+    Optional<NotificationEntity> findByUserIdAndId(Long userId, Long id);
 }

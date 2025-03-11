@@ -4,6 +4,7 @@ import app.teamwize.api.auth.service.SecurityService;
 import app.teamwize.api.base.domain.model.request.PaginationRequest;
 import app.teamwize.api.base.domain.model.response.PagedResponse;
 import app.teamwize.api.base.mapper.PagedResponseMapper;
+import app.teamwize.api.notification.exception.NotificationNotFoundException;
 import app.teamwize.api.notification.exception.NotificationTriggerNotFoundException;
 import app.teamwize.api.notification.model.NotificationStatus;
 import app.teamwize.api.notification.rest.mapper.NotificationRestMapper;
@@ -55,6 +56,13 @@ public class NotificationController {
                 result.totalContents()
         );
     }
+
+    @GetMapping("{id}")
+    public NotificationResponse getNotification(@PathVariable Long id) throws NotificationNotFoundException {
+        var notification = notificationService.getNotification(securityService.getUserOrganizationId(), id);
+        return notificationRestMapper.toResponse(notification);
+    }
+
 
     @GetMapping("count")
     public NotificationsCountResponse getUnreadNotificationsCount() {

@@ -27,4 +27,6 @@ public interface NotificationRestMapper {
     NotificationTriggerResponse toResponse(NotificationTrigger result);
 
     NotificationTriggerUpdateCommand toCommand(NotificationTriggerUpdateRequest request);
+
+    NotificationResponse toResponse(Notification notification);
 }

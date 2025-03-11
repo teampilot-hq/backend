@@ -4,6 +4,7 @@ import app.teamwize.api.base.domain.model.Paged;
 import app.teamwize.api.base.domain.model.request.PaginationRequest;
 import app.teamwize.api.event.service.EventService;
 import app.teamwize.api.notification.config.NotificationConfigModel;
+import app.teamwize.api.notification.exception.NotificationNotFoundException;
 import app.teamwize.api.notification.exception.NotificationTemplateCompileException;
 import app.teamwize.api.notification.exception.NotificationTriggerNotFoundException;
 import app.teamwize.api.notification.mapper.NotificationMapper;
@@ -88,18 +89,13 @@ public class NotificationService {
     }
 
     @Transactional(readOnly = true)
-    public Notification getNotification(Long id) {
-        var entity = notificationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Notification not found with id: " + id));
+    public Notification getNotification(Long userId, Long id) throws NotificationNotFoundException {
+        var entity = notificationRepository.findByUserIdAndId(userId, id)
+                .orElseThrow(() -> new NotificationNotFoundException("Notification not found with id: " + id));
         return notificationMapper.toModel(entity);
     }
 
 
-    @Transactional(readOnly = true)
-    public List<Notification> getNotificationsByOrganization(Long organizationId) {
-        var entities = notificationRepository.findByOrganizationId(organizationId);
-        return notificationMapper.toModels(entities);
-    }
 
     @Transactional(readOnly = true)
     public Paged<Notification> getNotifications(
@@ -110,7 +106,6 @@ public class NotificationService {
         var pageRequest = PageRequest.of(pagination.getPageNumber(), pagination.getPageSize(), sort);
 
         var specs = Specification.where(withOrganizationId(organizationId))
-                .and(withUserId(command.userId()))
                 .and(withStatus(command.status()))
                 .and(withEventType(command.eventType()));
 
