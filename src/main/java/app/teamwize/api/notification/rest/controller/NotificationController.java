@@ -44,7 +44,7 @@ public class NotificationController {
     @GetMapping
     public PagedResponse<NotificationResponse> getNotifications(@ParameterObject @Valid NotificationFilterRequest request,
                                                                 @ParameterObject @Valid PaginationRequest pagination) {
-        var result = notificationService.getNotifications(securityService.getUserOrganizationId(),
+        var result = notificationService.getNotifications(securityService.getUserId(),
                 notificationRestMapper.toCommand(request),
                 pagination
         );

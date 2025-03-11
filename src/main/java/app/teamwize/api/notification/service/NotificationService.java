@@ -99,13 +99,13 @@ public class NotificationService {
 
     @Transactional(readOnly = true)
     public Paged<Notification> getNotifications(
-            Long organizationId,
+            Long userId,
             NotificationFilterCommand command,
             PaginationRequest pagination) {
         var sort = Sort.by("id").descending();
         var pageRequest = PageRequest.of(pagination.getPageNumber(), pagination.getPageSize(), sort);
 
-        var specs = Specification.where(withOrganizationId(organizationId))
+        var specs = Specification.where(withUserId(userId))
                 .and(withStatus(command.status()))
                 .and(withEventType(command.eventType()));
 
