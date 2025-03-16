@@ -72,6 +72,8 @@ public class NotificationTriggerService {
 
 
         trigger.setChannels(request.channels() == null ? null : request.channels().toArray(new NotificationChannel[0]))
+                .setName(request.name())
+                .setTitle(request.title())
                 .setEventType(request.eventType())
                 .setHtmlTemplate(request.htmlTemplate())
                 .setTextTemplate(request.textTemplate())
