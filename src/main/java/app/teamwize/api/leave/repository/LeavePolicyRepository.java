@@ -14,13 +14,12 @@ import java.util.Optional;
 @Repository
 public interface LeavePolicyRepository extends BaseJpaRepository<LeavePolicy, Long> {
 
-
-    @EntityGraph(attributePaths = {"organization", "activatedTypes", "activatedTypes.type"}, type = EntityGraph.EntityGraphType.FETCH)
+    @EntityGraph(attributePaths = {"organization"}, type = EntityGraph.EntityGraphType.FETCH)
     List<LeavePolicy> findByOrganizationIdAndStatusIsIn(Long organizationId, List<LeavePolicyStatus> statuses);
 
     void deleteByOrganizationIdAndId(Long organizationId, Long id);
 
-    @EntityGraph(attributePaths = {"organization", "activatedTypes", "activatedTypes.type"}, type = EntityGraph.EntityGraphType.FETCH)
+    @EntityGraph(attributePaths = {"organization"}, type = EntityGraph.EntityGraphType.FETCH)
     Optional<LeavePolicy> findByOrganizationIdAndId(Long organizationId, Long id);
 
 

@@ -3,7 +3,7 @@ package app.teamwize.api.leave.rest.controller;
 import app.teamwize.api.auth.service.SecurityService;
 import app.teamwize.api.leave.exception.LeavePolicyNotFoundException;
 import app.teamwize.api.leave.exception.LeaveTypeNotFoundException;
-import app.teamwize.api.leave.rest.mapper.LeavePolicyMapper;
+import app.teamwize.api.leave.rest.mapper.LeavePolicyRestMapper;
 import app.teamwize.api.leave.rest.model.request.LeavePolicyCreateRequest;
 import app.teamwize.api.leave.rest.model.request.LeavePolicyUpdateRequest;
 import app.teamwize.api.leave.rest.model.response.LeavePolicyResponse;
@@ -21,7 +21,7 @@ import java.util.List;
 public class LeavePolicyController {
 
     private final LeavePolicyService leavePolicyService;
-    private final LeavePolicyMapper leavePolicyMapper;
+    private final LeavePolicyRestMapper leavePolicyRestMapper;
     private final SecurityService securityService;
 
     @PostMapping
@@ -29,23 +29,23 @@ public class LeavePolicyController {
             throws OrganizationNotFoundException, LeaveTypeNotFoundException {
         var leaveType = leavePolicyService.createLeavePolicy(
                 securityService.getUserOrganizationId(),
-                leavePolicyMapper.toNewLeavePolicy(request)
+                leavePolicyRestMapper.toNewLeavePolicy(request)
         );
-        return leavePolicyMapper.toResponse(leaveType);
+        return leavePolicyRestMapper.toResponse(leaveType);
     }
 
     @GetMapping
     public List<LeavePolicyResponse> getLeavePolicies() {
         var leaveTypes = leavePolicyService.getLeavePolicies(securityService.getUserOrganizationId());
         return leaveTypes.stream()
-                .map(leavePolicyMapper::toResponse)
+                .map(leavePolicyRestMapper::toResponse)
                 .toList();
     }
 
     @GetMapping("{id}")
     public LeavePolicyResponse getLeavePolicy(@PathVariable Long id) throws LeavePolicyNotFoundException {
         var leaveType = leavePolicyService.getLeavePolicy(securityService.getUserOrganizationId(), id);
-        return leavePolicyMapper.toResponse(leaveType);
+        return leavePolicyRestMapper.toResponse(leaveType);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -67,9 +67,9 @@ public class LeavePolicyController {
         var leaveType = leavePolicyService.updateLeavePolicy(
                 securityService.getUserOrganizationId(),
                 id,
-                leavePolicyMapper.toUpdateLeavePolicy(request)
+                leavePolicyRestMapper.toUpdateLeavePolicy(request)
         );
-        return leavePolicyMapper.toResponse(leaveType);
+        return leavePolicyRestMapper.toResponse(leaveType);
     }
 
 

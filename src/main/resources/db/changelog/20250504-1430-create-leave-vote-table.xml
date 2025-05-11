@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="20250504-1430-create-leave-vote-table" author="M.Karimi">
+        <createSequence sequenceName="leave_vote_id_seq" startValue="1" incrementBy="1"/>
+
+        <createTable tableName="leave_votes">
+            <column name="id" type="BIGINT" defaultValue="nextval('leave_vote_id_seq')">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="updated_at" type="TIMESTAMP WITHOUT TIME ZONE"/>
+
+            <column name="leave_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="leave_votes"
+                baseColumnNames="leave_id"
+                constraintName="fk_leave_vote_leave_id"
+                referencedTableName="leaves"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                baseTableName="leave_votes"
+                baseColumnNames="user_id"
+                constraintName="fk_leave_vote_user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+
+        <createIndex
+                indexName="idx_leave_vote_leave"
+                tableName="leave_votes">
+            <column name="leave_id"/>
+        </createIndex>
+
+        <createIndex
+                indexName="idx_leave_vote_user"
+                tableName="leave_votes">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet id="20250511-1540-add-message-to-leave-vote-table" author="M.Karimi">
+        <addColumn tableName="leave_votes">
+            <column name="message" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog> 

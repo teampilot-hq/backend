@@ -3,19 +3,10 @@ spring:
     properties:
       hibernate:
         format_sql: false
-  mail:
-    host: smtp.zoho.com
-    port: 587
-    password: 431069562Oo!
-    username: me@mohsen.work
-    properties:
-      mail:
-        smtp:
-          auth: true
-          ssl:
-            trust: smtp.zoho.com
-          from: me@mohsen.work
-          socketFactory:
-            port: 587
-          starttls:
-            enable: true
+app:
+  notification:
+    email:
+      from: "me@mohsen.work"
+      unsubscribe-url: "https://teampilot.app/unsubscribe"
+      company-name: "Teampilot"
+      base-url: "https://my.teampilot.app"

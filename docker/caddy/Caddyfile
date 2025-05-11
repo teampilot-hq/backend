@@ -1,0 +1,63 @@
+{
+    admin off
+    auto_https off
+    log {
+        format json
+    }
+}
+
+:80 {
+    # API requests
+    handle_path /api/* {
+        reverse_proxy teampilot-api:80 {
+            health_uri http://teampilot-api:80/actuator/health
+            health_interval 10s
+            health_status 200
+
+            # Retry configuration
+            lb_try_duration 30s
+            lb_try_interval 250ms
+
+            # Error handling for API
+            @error status 502 503 504
+            handle_response @error {
+                header Content-Type application/json
+                respond `{
+                    "status": {http.reverse_proxy.status_code},
+                    "error": "Service Unavailable",
+                    "message": "The API service is temporarily unavailable. Please try again in a few moments.",
+                    "path": {http.request.uri.path},
+                    "timestamp": "{now}"
+                }`
+            }
+        }
+    }
+
+    # All other requests
+    handle {
+        reverse_proxy teampilot-app:80 {
+            health_uri http://teampilot-app:80/
+            health_interval 10s
+            health_status 200
+
+            # Retry configuration
+            lb_try_duration 10s
+            lb_try_interval 250ms
+
+            # Error handling for frontend
+            @error status 502 503 504
+            handle_response @error {
+                root * /var/www
+                rewrite * /maintenance.html
+                file_server
+            }
+        }
+    }
+
+    # Global error handling
+    handle_errors {
+        root * /var/www
+        rewrite * /maintenance.html
+        file_server
+    }
+}

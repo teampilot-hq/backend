@@ -86,7 +86,7 @@ public class EventService {
                 executionRepository.update(execution);
             }
             if (pendingExecutions.stream().allMatch(execution -> execution.getStatus() == EventExecutionStatus.FINISHED)) {
-                pendingEvent.setStatus(EventStatus.FINISHED);
+                pendingEvent.setStatus(EventStatus.COMPLETED);
             } else {
                 pendingEvent.setStatus(EventStatus.PENDING);
             }

@@ -8,11 +8,11 @@ import app.teamwize.api.leave.exception.LeaveNotFoundException;
 import app.teamwize.api.leave.exception.LeavePolicyNotFoundException;
 import app.teamwize.api.leave.exception.LeaveTypeNotFoundException;
 import app.teamwize.api.leave.exception.LeaveUpdateStatusFailedException;
-import app.teamwize.api.leave.rest.mapper.LeaveMapper;
+import app.teamwize.api.leave.rest.mapper.LeaveRestMapper;
 import app.teamwize.api.leave.rest.model.request.LeaveCheckRequest;
 import app.teamwize.api.leave.rest.model.request.LeaveCreateRequest;
 import app.teamwize.api.leave.rest.model.request.LeaveFilterRequest;
-import app.teamwize.api.leave.rest.model.request.LeaveUpdateRequest;
+import app.teamwize.api.leave.rest.model.request.LeaveVoteRequest;
 import app.teamwize.api.leave.rest.model.response.LeaveCheckResponse;
 import app.teamwize.api.leave.rest.model.response.LeaveResponse;
 import app.teamwize.api.leave.rest.model.response.UserLeaveBalanceResponse;
@@ -33,7 +33,7 @@ public class LeaveController {
 
     private final LeaveService leaveService;
     private final SecurityService securityService;
-    private final LeaveMapper leaveMapper;
+    private final LeaveRestMapper leaveRestMapper;
     private final PagedResponseMapper pagedResponseMapper;
 
 
@@ -43,9 +43,9 @@ public class LeaveController {
         var dayOff = leaveService.createLeave(
                 securityService.getUserOrganizationId(),
                 securityService.getUserId(),
-                leaveMapper.toCreateCommand(request)
+                leaveRestMapper.toCreateCommand(request)
         );
-        return leaveMapper.toLeaveResponse(dayOff);
+        return leaveRestMapper.toLeaveResponse(dayOff);
     }
 
     @GetMapping
@@ -53,7 +53,7 @@ public class LeaveController {
                                                    @ParameterObject @Valid LeaveFilterRequest filters) {
         var daysOff = leaveService.getLeaves(securityService.getUserOrganizationId(), filters, pagination);
         return pagedResponseMapper.toPagedResponse(
-                leaveMapper.toLeaveResponses(daysOff.getContent()),
+                leaveRestMapper.toLeaveResponses(daysOff.getContent()),
                 daysOff.getNumber(),
                 daysOff.getSize(),
                 daysOff.getTotalPages(),
@@ -65,7 +65,7 @@ public class LeaveController {
     public PagedResponse<LeaveResponse> getMineDaysOff(@ParameterObject PaginationRequest pagination) {
         var daysOff = leaveService.getLeaves(securityService.getUserOrganizationId(), securityService.getUserId(), pagination);
         return pagedResponseMapper.toPagedResponse(
-                leaveMapper.toLeaveResponses(daysOff.getContent()),
+                leaveRestMapper.toLeaveResponses(daysOff.getContent()),
                 daysOff.getNumber(),
                 daysOff.getSize(),
                 daysOff.getTotalPages(),
@@ -76,32 +76,37 @@ public class LeaveController {
     @GetMapping("mine/balance")
     public List<UserLeaveBalanceResponse> getBalance() throws UserNotFoundException, LeavePolicyNotFoundException {
         return leaveService.getLeaveBalance(securityService.getUserOrganizationId(), securityService.getUserId())
-                .stream().map(leaveMapper::toUserLeaveBalanceResponse)
+                .stream().map(leaveRestMapper::toUserLeaveBalanceResponse)
                 .toList();
     }
 
     @GetMapping("{id}/balance")
     public List<UserLeaveBalanceResponse> getBalanceById(@PathVariable Long id) throws UserNotFoundException, LeavePolicyNotFoundException {
         return leaveService.getLeaveBalance(securityService.getUserOrganizationId(), id)
-                .stream().map(leaveMapper::toUserLeaveBalanceResponse)
+                .stream().map(leaveRestMapper::toUserLeaveBalanceResponse)
                 .toList();
     }
 
-    @PutMapping("{id}")
-    public LeaveResponse updateDayOff(@PathVariable Long id, @RequestBody LeaveUpdateRequest request) throws LeaveNotFoundException, LeaveUpdateStatusFailedException, UserNotFoundException {
-        return leaveMapper.toLeaveResponse(leaveService.updateLeave(securityService.getUserOrganizationId(), securityService.getUserId(), id, leaveMapper.toUpdateCommand(request)));
+    @PutMapping("{id}/vote")
+    public LeaveResponse updateDayOff(@PathVariable Long id, @RequestBody LeaveVoteRequest request) throws LeaveNotFoundException, LeaveUpdateStatusFailedException, UserNotFoundException, LeavePolicyNotFoundException {
+        return leaveRestMapper.toLeaveResponse(leaveService.vote(
+                securityService.getUserOrganizationId(),
+                id,
+                securityService.getUserId(),
+                leaveRestMapper.toVoteCommand(request)
+        ));
     }
 
     @GetMapping("{id}")
     public LeaveResponse getDayOff(@PathVariable Long id) throws LeaveNotFoundException {
-        return leaveMapper.toLeaveResponse(leaveService.getLeave(securityService.getUserOrganizationId(), id));
+        return leaveRestMapper.toLeaveResponse(leaveService.getLeave(securityService.getUserOrganizationId(), id));
     }
 
     @PostMapping("check")
     public LeaveCheckResponse checkVacation(@RequestBody LeaveCheckRequest request)
             throws UserNotFoundException, OrganizationNotFoundException {
-        var command = leaveMapper.toCheckCommand(request);
+        var command = leaveRestMapper.toCheckCommand(request);
         var result = leaveService.checkRequestedLeave(securityService.getUserOrganizationId(), securityService.getUserId(), command);
-        return leaveMapper.toLeaveCheckResponse(result);
+        return leaveRestMapper.toLeaveCheckResponse(result);
     }
 }

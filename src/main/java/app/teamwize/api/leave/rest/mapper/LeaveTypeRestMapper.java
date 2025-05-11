@@ -12,7 +12,7 @@ import app.teamwize.api.leave.rest.model.response.LeaveTypeResponse;
 import org.mapstruct.Mapper;
 
 @Mapper(config = DefaultMapperConfig.class)
-public interface LeaveTypeMapper {
+public interface LeaveTypeRestMapper {
 
     LeaveTypeResponse toResponse(LeaveType leaveType);
 

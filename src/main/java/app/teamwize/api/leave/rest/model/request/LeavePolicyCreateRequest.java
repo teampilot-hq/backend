@@ -8,6 +8,8 @@ import java.util.List;
 public record LeavePolicyCreateRequest(
         String name,
         LeavePolicyStatus status,
+        List<LeaveApproverRequest> approvers,
+        List<LeavePolicyApprovalStepRequest> approvalSteps,
         List<LeavePolicyActivatedTypeRequest> activatedTypes) {
 }
 

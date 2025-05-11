@@ -50,7 +50,7 @@ public class AuthenticationService implements UserDetailsService {
     @Transactional(rollbackFor = BaseException.class)
     public AuthenticationResponse register(RegistrationRequest request) throws UserAlreadyExistsException, OrganizationNotFoundException, TeamNotFoundException, LeaveTypeNotFoundException, LeavePolicyNotFoundException {
         var organization = organizationService.registerOrganization(new OrganizationCreateRequest(request.organizationName(), request.country(), request.timezone()));
-        var leavePolicy = leavePolicyService.createDefaultLeavePolicy(organization.getId());
+        var leavePolicy = leavePolicyService.createDefaultLeavePolicy(organization.getId(), 1L);
         var team = teamService.createTeam(organization.getId(), new TeamCreateRequest("Default", null));
         var registerRequest = new AdminUserCreateRequest(
                 request.email(),

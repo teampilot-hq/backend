@@ -8,5 +8,7 @@ public record LeavePolicyResponse(
         Long id,
         String name,
         LeavePolicyStatus status,
+        List<LeavePolicyApprovalStepResponse> approvalSteps,
+        List<LeavePolicyApproverResponse> approvers,
         List<LeavePolicyActivatedTypeResponse> activatedTypes) {
 }

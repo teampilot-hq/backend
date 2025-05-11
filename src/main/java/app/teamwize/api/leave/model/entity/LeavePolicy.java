@@ -3,11 +3,14 @@ package app.teamwize.api.leave.model.entity;
 import app.teamwize.api.base.domain.entity.BaseAuditEntity;
 import app.teamwize.api.leave.model.LeavePolicyStatus;
 import app.teamwize.api.organization.domain.entity.Organization;
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -30,9 +33,16 @@ public class LeavePolicy extends BaseAuditEntity {
     private Organization organization;
 
     @OneToMany(
-            mappedBy = "policy",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            mappedBy = "policy"
     )
     private List<LeavePolicyActivatedType> activatedTypes;
+
+    @Type(JsonType.class)
+    @Column(name = "approval_steps", columnDefinition = "jsonb")
+    private List<LeavePolicyApprovalStep> approvalSteps = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "policy"
+    )
+    private List<LeavePolicyApprover> approvers;
 }

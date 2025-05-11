@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: "postgres:14-bullseye"
+    container_name: teampilot-postgres
+    networks:
+      - teampilot-network
+    ports:
+      - '8002:5432'
+    environment:
+      POSTGRES_DB: teampilot-db
+      POSTGRES_USER: pg-admin
+      POSTGRES_PASSWORD: pg-admin
+      PGDATA: /data/postgres
+    volumes:
+      - ./data:/data/postgres
+  api:
+    image: "ghcr.io/teampilot-hq/api:dev"
+    container_name: teampilot-api
+    networks:
+      - teampilot-network
+    env_file:
+      - .env
+  app:
+    image: "ghcr.io/teampilot-hq/dashboard-app:latest"
+    container_name: teampilot-app
+    networks:
+      - teampilot-network
+  gateway:
+    image: caddy:2-alpine
+    container_name: teampilot-gateway
+    networks:
+      - teampilot-network
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/maintenance.html:/var/www/maintenance.html
+    depends_on:
+      - teampilot-app
+      - teampilot-api
+
+networks:
+  teampilot-network:
+    external: false
