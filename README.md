@@ -1,6 +1,6 @@
-# Teamwize
+# TeamPilot
 
-Teamwize is an open-source leave tracker designed for small and remote companies that need software to efficiently manage and track employee leaves.
+TeamPilot is an open-source leave tracker designed for small and remote companies that need software to efficiently manage and track employee leaves.
 
 ## Features
 
@@ -28,7 +28,7 @@ Teamwize is an open-source leave tracker designed for small and remote companies
 - Database (e.g., MySQL, PostgreSQL) installed and running
 
 ## Contributing
-We welcome contributions to Teamwize! To contribute:
+We welcome contributions to TeamPilot! To contribute:
 
 - Fork the repository
 - Create your feature branch (git checkout -b feature/YourFeature)
