@@ -39,6 +39,4 @@ We welcome contributions to TeamPilot! To contribute:
 ## License
 This project is licensed under the MIT License.
 
-## Contact
-For questions or support, please contact [mohsenk.work@gmail.com](mailto:mohsenk.work@gmail.com).
    
